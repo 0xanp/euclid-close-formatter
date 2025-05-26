@@ -3,7 +3,7 @@ import pandas as pd
 import io
 import re
 
-st.title("Euclid's Close CRM Formatter")
+st.title("Property Phone Number Transformer with State De-abbreviation and Sanity Checks")
 
 # US State abbreviation to full name mapping
 state_map = {
@@ -87,7 +87,6 @@ if uploaded_file:
 
     # --- Dynamically detect address, personal, relative numbers ---
     address_nums = detect_dynamic_numbers(df, r'Address(\d+): Address Full Address')
-    address_phone_nums = detect_dynamic_numbers(df, r'Address1: Associated Phone (\d+)')
     # For all addresses, get their individual phone number counts
     address_phone_dict = {}
     for addr_num in address_nums:
@@ -96,7 +95,6 @@ if uploaded_file:
 
     personal_nums = detect_dynamic_numbers(df, r'Phone(\d+): Phone Number')
     relative_nums = detect_dynamic_numbers(df, r'Relative(\d+): Phone 1 Number')
-    relative_phone_nums = detect_dynamic_numbers(df, r'Relative1: Phone (\d+) Number')
     # For all relatives, get their individual phone number counts
     relative_phone_dict = {}
     for rel_num in relative_nums:
@@ -124,7 +122,7 @@ if uploaded_file:
                     addr_val = row[addr_col]
                     if is_valid(phone_val):
                         rec = {k: row[k] for k in source_cols}
-                        rec["Phone number type"] = f"Address {addr_num} : Phone {phone_num}"
+                        rec["Phone Line Type"] = f"Address {addr_num} : Phone {phone_num}"
                         rec["Phone number"] = phone_val
                         records.append(rec)
                         sanity_summary["Property Phones"] += 1
@@ -136,7 +134,7 @@ if uploaded_file:
                 phone_val = row[phone_col]
                 if is_valid(phone_val):
                     rec = {k: row[k] for k in source_cols}
-                    rec["Phone number type"] = f"Personal : Phone {phone_idx}"
+                    rec["Phone Line Type"] = f"Personal : Phone {phone_idx}"
                     rec["Phone number"] = phone_val
                     records.append(rec)
                     sanity_summary["Personal Phones"] += 1
@@ -149,7 +147,7 @@ if uploaded_file:
                     phone_val = row[phone_col]
                     if is_valid(phone_val):
                         rec = {k: row[k] for k in source_cols}
-                        rec["Phone number type"] = f"Relative {rel_idx} : Phone {phone_num}"
+                        rec["Phone Line Type"] = f"Relative {rel_idx} : Phone {phone_num}"
                         rec["Phone number"] = phone_val
                         records.append(rec)
                         sanity_summary["Relative Phones"] += 1
@@ -201,6 +199,6 @@ st.markdown("""
 - Upload a CSV file.
 - All 'Source:' columns are preserved per record (deduplicated if identical).
 - State abbreviations in 'Source:' columns are expanded to full names.
-- Each phone number becomes a new row, with type and value, plus source fields.
+- Each phone number becomes a new row, with 'Phone Line Type' and value, plus source fields.
 - See sanity checks for data quality before exporting.
 """)
