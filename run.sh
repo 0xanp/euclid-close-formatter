@@ -1,3 +1,4 @@
+git pull
 docker stop euclid-close-formatter || true
 docker rm euclid-close-formatter || true
 docker rmi euclid-close-formatter || true
